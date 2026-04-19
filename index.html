@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#04b09c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Hand Hygiene">
+<meta name="description" content="Dashboard Pemantauan Kebersihan Tangan 6 Langkah">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>Dashboard Kebersihan Tangan 6 Langkah</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal: #04b09c;
+    --teal-dark: #027a6d;
+    --teal-light: #e0f7f5;
+    --teal-mid: #5dd5c8;
+    --accent: #f9a825;
+    --accent2: #ef5350;
+    --accent3: #66bb6a;
+    --bg: #f0faf9;
+    --card: #ffffff;
+    --text: #0d2e2b;
+    --muted: #5a8a85;
+    --border: #c8ece9;
+    --shadow: 0 2px 16px rgba(4,176,156,0.10);
+    --radius: 16px;
+    --font: 'Plus Jakarta Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 60%, var(--teal-mid) 100%);
+    color: white;
+    padding: 20px 24px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content:''; position:absolute; top:-60px; right:-40px;
+    width:220px; height:220px; background: rgba(255,255,255,0.07); border-radius:50%;
+  }
+  .header::after {
+    content:''; position:absolute; bottom:-80px; left:30px;
+    width:160px; height:160px; background: rgba(255,255,255,0.05); border-radius:50%;
+  }
+  .header-top {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:10px; position:relative; z-index:1;
+  }
+  .logo { display:flex; align-items:center; gap:10px; }
+  .logo-icon {
+    width:44px; height:44px; background:rgba(255,255,255,0.2);
+    border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px;
+  }
+  .logo h1 { font-size:15px; font-weight:700; line-height:1.3; }
+  .logo small { font-size:11px; opacity:.75; font-weight:400; }
+  .sync-btn {
+    background:rgba(255,255,255,0.2); border:1.5px solid rgba(255,255,255,0.35);
+    color:white; padding:8px 14px; border-radius:10px; font-size:12px;
+    font-family:var(--font); font-weight:600; cursor:pointer;
+    display:flex; align-items:center; gap:6px; transition:.2s;
+  }
+  .sync-btn:hover { background:rgba(255,255,255,0.3); }
+  .sync-btn:disabled { opacity:.6; cursor:not-allowed; }
+  .sync-btn.spinning .spin-icon { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  .header-stats {
+    display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+    position:relative; z-index:1; margin-top:16px;
+  }
+  .hstat {
+    background:rgba(255,255,255,0.15); border-radius:12px;
+    padding:12px; text-align:center; backdrop-filter:blur(4px);
+  }
+  .hstat-val { font-size:24px; font-weight:800; line-height:1; }
+  .hstat-lbl { font-size:10px; opacity:.8; margin-top:3px; font-weight:500; letter-spacing:.3px; }
+
+  /* ── NAV TABS ── */
+  .nav-tabs {
+    display:flex; background:white; border-bottom:2px solid var(--border);
+    overflow-x:auto; scrollbar-width:none; position:sticky; top:0; z-index:10;
+  }
+  .nav-tabs::-webkit-scrollbar { display:none; }
+  .tab-btn {
+    padding:13px 18px; font-size:12px; font-weight:600;
+    border:none; background:none; color:var(--muted); cursor:pointer;
+    white-space:nowrap; font-family:var(--font);
+    border-bottom:2.5px solid transparent; margin-bottom:-2px; transition:.2s;
+  }
+  .tab-btn.active { color:var(--teal); border-bottom-color:var(--teal); }
+  .tab-btn:hover { color:var(--teal); background:var(--teal-light); }
+
+  /* ── MAIN ── */
+  .main { padding:16px; max-width:1100px; margin:0 auto; }
+
+  .section-title {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:12px; margin-top:8px;
+  }
+  .section-title h2 { font-size:14px; font-weight:700; color:var(--text); }
+  .section-title span { font-size:11px; color:var(--muted); }
+
+  /* ── CARDS ── */
+  .cards-grid {
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr));
+    gap:12px; margin-bottom:16px;
+  }
+  .unit-card {
+    background:var(--card); border-radius:var(--radius);
+    box-shadow:var(--shadow); border:1.5px solid var(--border);
+    padding:16px; transition:.2s; animation: fadeUp .4s ease both;
+  }
+  .unit-card:hover { transform:translateY(-2px); box-shadow:0 6px 24px rgba(4,176,156,0.18); }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+  .unit-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .unit-name { font-size:13px; font-weight:700; }
+  .unit-badge { padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; letter-spacing:.3px; }
+  .badge-great { background:#e8f5e9; color:#2e7d32; }
+  .badge-good  { background:#fff8e1; color:#f57f17; }
+  .badge-low   { background:#fce4ec; color:#c62828; }
+
+  .progress-wrap { margin-bottom:10px; }
+  .progress-labels { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:5px; }
+  .progress-labels strong { color:var(--text); font-weight:700; }
+  .progress-bar { height:10px; background:var(--teal-light); border-radius:99px; overflow:hidden; }
+  .progress-fill {
+    height:100%; border-radius:99px;
+    background:linear-gradient(90deg, var(--teal-dark), var(--teal-mid));
+    transition: width 1s cubic-bezier(.4,0,.2,1);
+  }
+  .progress-fill.warn   { background:linear-gradient(90deg,#f57f17,#ffca28); }
+  .progress-fill.danger { background:linear-gradient(90deg,#c62828,#ef5350); }
+
+  .steps-mini { display:grid; grid-template-columns:repeat(6,1fr); gap:4px; margin-top:10px; }
+  .step-dot {
+    aspect-ratio:1; border-radius:50%; display:flex; align-items:center;
+    justify-content:center; font-size:9px; font-weight:700;
+    background:var(--teal-light); color:var(--teal-dark); transition:.3s;
+  }
+  .step-dot.done { background:var(--teal); color:white; }
+
+  .unit-footer {
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top:10px; padding-top:10px; border-top:1px solid var(--border);
+  }
+  .unit-footer span { font-size:10px; color:var(--muted); }
+  .edit-btn {
+    font-size:10px; font-weight:600; color:var(--teal); background:var(--teal-light);
+    border:none; padding:4px 10px; border-radius:8px; cursor:pointer;
+    font-family:var(--font); transition:.2s;
+  }
+  .edit-btn:hover { background:var(--teal); color:white; }
+
+  /* ── TABLE ── */
+  .steps-table-wrap {
+    background:var(--card); border-radius:var(--radius);
+    box-shadow:var(--shadow); border:1.5px solid var(--border);
+    overflow:hidden; margin-bottom:16px;
+  }
+  .steps-table-header {
+    background:linear-gradient(135deg, var(--teal-dark), var(--teal));
+    color:white; padding:14px 18px; font-size:13px; font-weight:700;
+    display:flex; align-items:center; gap:8px;
+  }
+  table { width:100%; border-collapse:collapse; }
+  th { background:var(--teal-light); color:var(--teal-dark); font-size:11px; font-weight:700; padding:10px 14px; text-align:left; letter-spacing:.3px; }
+  td { padding:10px 14px; font-size:12px; border-bottom:1px solid var(--border); }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:var(--teal-light); }
+  .step-num {
+    width:26px; height:26px; border-radius:50%; background:var(--teal); color:white;
+    display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;
+  }
+  .pct-bar-cell { min-width:120px; }
+  .mini-bar { height:7px; background:#e0f7f5; border-radius:99px; overflow:hidden; }
+  .mini-fill { height:100%; border-radius:99px; background:linear-gradient(90deg, var(--teal-dark), var(--teal-mid)); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display:none; position:fixed; inset:0;
+    background:rgba(0,30,28,0.45); z-index:999;
+    align-items:center; justify-content:center; padding:16px; backdrop-filter:blur(4px);
+  }
+  .modal-overlay.open { display:flex; }
+  .modal {
+    background:white; border-radius:20px; width:100%; max-width:440px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.2);
+    animation:modalIn .25s cubic-bezier(.4,0,.2,1); overflow:hidden;
+  }
+  @keyframes modalIn { from{opacity:0;transform:scale(.92) translateY(20px)} to{opacity:1;transform:scale(1) translateY(0)} }
+  .modal-header {
+    background:linear-gradient(135deg, var(--teal-dark), var(--teal));
+    color:white; padding:18px 20px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .modal-header h3 { font-size:15px; font-weight:700; }
+  .modal-close {
+    background:rgba(255,255,255,0.2); border:none; color:white;
+    width:30px; height:30px; border-radius:50%; font-size:16px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .modal-body { padding:20px; }
+  .form-group { margin-bottom:14px; }
+  .form-group label { display:block; font-size:12px; font-weight:600; margin-bottom:6px; color:var(--muted); }
+  .form-group input {
+    width:100%; padding:10px 14px; border:1.5px solid var(--border);
+    border-radius:10px; font-size:13px; font-family:var(--font); outline:none; transition:.2s; color:var(--text);
+  }
+  .form-group input:focus { border-color:var(--teal); }
+  .steps-input-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .step-input-wrap { text-align:center; }
+  .step-input-wrap label { font-size:10px; margin-bottom:4px; color:var(--teal-dark); font-weight:700; }
+  .step-input-wrap input { text-align:center; padding:8px; font-family:var(--mono); font-size:13px; }
+  .modal-footer {
+    padding:14px 20px; background:#f9fffe;
+    display:flex; gap:8px; justify-content:flex-end; border-top:1px solid var(--border);
+  }
+  .btn-cancel {
+    padding:9px 18px; border-radius:10px; font-size:13px; font-weight:600;
+    border:1.5px solid var(--border); background:white; cursor:pointer;
+    font-family:var(--font); color:var(--muted); transition:.2s;
+  }
+  .btn-cancel:hover { border-color:var(--muted); }
+  .btn-save {
+    padding:9px 22px; border-radius:10px; font-size:13px; font-weight:700;
+    border:none; background:var(--teal); color:white; cursor:pointer; font-family:var(--font); transition:.2s;
+  }
+  .btn-save:hover { background:var(--teal-dark); }
+
+  /* ── TOAST ── */
+  .toast {
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
+    background:#1a3a38; color:white; padding:12px 22px; border-radius:12px;
+    font-size:13px; font-weight:600; z-index:9999; transition:.3s;
+    box-shadow:0 4px 20px rgba(0,0,0,.25); white-space:nowrap;
+  }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+
+  /* ── INSTALL BANNER ── */
+  .install-banner {
+    display:none; position:fixed; bottom:16px; left:16px; right:16px;
+    background:linear-gradient(135deg,var(--teal-dark),var(--teal));
+    color:white; border-radius:16px; padding:14px 16px;
+    box-shadow:0 8px 32px rgba(4,176,156,.4); z-index:888;
+    align-items:center; gap:12px; animation:slideUp .4s ease;
+  }
+  @keyframes slideUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+  .install-banner.visible { display:flex; }
+  .install-banner p { flex:1; font-size:12px; font-weight:600; line-height:1.4; }
+  .install-banner .install-actions { display:flex; gap:8px; }
+  .btn-install { padding:8px 16px; background:white; color:var(--teal-dark); border:none; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; font-family:var(--font); }
+  .btn-dismiss { padding:8px 12px; background:rgba(255,255,255,0.2); color:white; border:1.5px solid rgba(255,255,255,0.35); border-radius:10px; font-size:12px; font-weight:600; cursor:pointer; font-family:var(--font); }
+
+  /* ── SUMMARY ── */
+  .summary-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:12px; margin-bottom:16px; }
+  .sum-card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); border:1.5px solid var(--border); padding:16px; text-align:center; animation:fadeUp .4s ease both; }
+  .sum-card .val { font-size:32px; font-weight:800; color:var(--teal); line-height:1; }
+  .sum-card .lbl { font-size:11px; color:var(--muted); margin-top:4px; font-weight:500; }
+
+  /* ── SETTINGS ── */
+  .setting-card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); border:1.5px solid var(--border); padding:20px; margin-bottom:16px; }
+  .setting-card h3 { font-size:14px; font-weight:700; margin-bottom:14px; color:var(--teal-dark); }
+  .setting-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); }
+  .setting-row:last-child { border-bottom:none; }
+  .setting-row label { font-size:13px; font-weight:500; }
+  .setting-row small { font-size:11px; color:var(--muted); }
+  .target-input { width:80px; padding:7px 10px; border:1.5px solid var(--border); border-radius:8px; font-size:14px; font-family:var(--mono); font-weight:600; color:var(--teal-dark); text-align:center; outline:none; }
+  .target-input:focus { border-color:var(--teal); }
+  .btn-save-settings { width:100%; padding:12px; background:var(--teal); color:white; border:none; border-radius:12px; font-size:14px; font-weight:700; cursor:pointer; font-family:var(--font); margin-top:14px; transition:.2s; }
+  .btn-save-settings:hover { background:var(--teal-dark); }
+
+  /* ── STATUS ── */
+  .status-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:5px; }
+  .dot-green  { background:#4caf50; }
+  .dot-yellow { background:#f9a825; animation:blink 1.2s infinite; }
+  .dot-red    { background:#ef5350; animation:blink 1.2s infinite; }
+  @keyframes blink { 50%{opacity:.3} }
+
+  /* ── ERROR BOX ── */
+  .error-box {
+    background:#fce4ec; border:1.5px solid #ef9a9a; border-radius:12px;
+    padding:14px 16px; margin-bottom:14px; font-size:12px; color:#c62828;
+    display:none; line-height:1.8; white-space:pre-line;
+  }
+  .error-box.show { display:block; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width:500px) {
+    .header-stats { gap:6px; }
+    .hstat-val { font-size:20px; }
+    .cards-grid { grid-template-columns:1fr; }
+    .steps-mini { display:none; }
+  }
+  .hidden { display:none !important; }
+  .fade-section { animation:fadeUp .35s ease; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div class="logo">
+      <div class="logo-icon">🖐️</div>
+      <div>
+        <h1>Kebersihan Tangan 6 Langkah</h1>
+        <small>Dashboard Pemantauan Kepatuhan</small>
+      </div>
+    </div>
+    <button class="sync-btn" onclick="syncFromSheet()" id="syncBtn">
+      <span class="spin-icon">🔄</span> Sinkron
+    </button>
+  </div>
+  <div class="header-stats">
+    <div class="hstat"><div class="hstat-val" id="hTotalSample">–</div><div class="hstat-lbl">Total Sampel</div></div>
+    <div class="hstat"><div class="hstat-val" id="hAvgCompliance">–%</div><div class="hstat-lbl">Rata-rata Kepatuhan</div></div>
+    <div class="hstat"><div class="hstat-val" id="hCompliant">–</div><div class="hstat-lbl">Unit ≥ 75%</div></div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="showTab('dashboard', this)">📊 Dashboard</button>
+  <button class="tab-btn" onclick="showTab('steps', this)">📋 Per Langkah</button>
+  <button class="tab-btn" onclick="showTab('summary', this)">📈 Ringkasan</button>
+  <button class="tab-btn" onclick="showTab('settings', this)">⚙️ Pengaturan</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;font-size:11px;color:var(--muted);">
+    <span><span class="status-dot dot-green" id="statusDot"></span><span id="statusText">Memuat data...</span></span>
+    <span id="lastSync">–</span>
+  </div>
+
+  <div class="error-box" id="errorBox"></div>
+
+  <!-- TAB DASHBOARD -->
+  <div id="tab-dashboard" class="fade-section">
+    <div class="section-title">
+      <h2>Kepatuhan per Unit Kerja</h2>
+      <span id="bulanLabel">–</span>
+    </div>
+    <div class="cards-grid" id="cardsGrid"></div>
+  </div>
+
+  <!-- TAB PER LANGKAH -->
+  <div id="tab-steps" class="hidden fade-section">
+    <div class="section-title"><h2>Analisis Per Langkah Cuci Tangan</h2></div>
+    <div class="steps-table-wrap">
+      <div class="steps-table-header">🖐️ 6 Langkah WHO – Tingkat Kepatuhan</div>
+      <table>
+        <thead><tr><th>Langkah</th><th>Deskripsi</th><th class="pct-bar-cell">Kepatuhan</th><th>%</th></tr></thead>
+        <tbody id="stepsTableBody"></tbody>
+      </table>
+    </div>
+    <div class="section-title"><h2>Detail per Unit × Langkah</h2></div>
+    <div class="steps-table-wrap">
+      <div class="steps-table-header">📋 Matriks Kepatuhan</div>
+      <div style="overflow-x:auto">
+        <table><thead id="matrixHead"></thead><tbody id="matrixBody"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB RINGKASAN -->
+  <div id="tab-summary" class="hidden fade-section">
+    <div class="section-title"><h2>Ringkasan Keseluruhan</h2></div>
+    <div class="summary-grid" id="summaryGrid"></div>
+    <div class="steps-table-wrap">
+      <div class="steps-table-header">🏆 Ranking Unit Kerja</div>
+      <table>
+        <thead><tr><th>#</th><th>Unit</th><th>Sampel</th><th>Target</th><th class="pct-bar-cell">Progress</th><th>Kepatuhan</th></tr></thead>
+        <tbody id="rankingBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB SETTINGS -->
+  <div id="tab-settings" class="hidden fade-section">
+    <div class="setting-card">
+      <h3>🎯 Target Sampel Bulanan per Unit</h3>
+      <div id="targetRows"></div>
+      <button class="btn-save-settings" onclick="saveTargets()">💾 Simpan Target</button>
+    </div>
+
+    <div class="setting-card">
+      <h3>🔗 Sumber Data (Google Apps Script)</h3>
+      <p style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6;">
+        URL deploy Apps Script yang mengembalikan data JSON dari Google Sheets.
+      </p>
+      <div class="form-group">
+        <label>Apps Script URL</label>
+        <input type="text" id="appsScriptUrl" placeholder="https://script.google.com/macros/s/.../exec" style="font-family:var(--mono);font-size:10px;">
+      </div>
+      <button class="btn-save-settings" onclick="saveScriptConfig()">💾 Simpan & Sinkron</button>
+    </div>
+
+    <div class="setting-card">
+      <h3>📋 Format JSON yang Diharapkan</h3>
+      <p style="font-size:12px;color:var(--muted);line-height:1.9;">
+        Apps Script harus return JSON:<br>
+        <code style="background:#e0f7f5;padding:2px 6px;border-radius:4px;font-size:10px;display:block;margin:6px 0">[ { "unit": "RM", "sample": 10, "steps": [8,7,9,8,7,6] }, ... ]</code>
+        Atau dengan wrapper:<br>
+        <code style="background:#e0f7f5;padding:2px 6px;border-radius:4px;font-size:10px;display:block;margin:6px 0">{ "data": [ ... ] }</code>
+        Kolom steps = jumlah yang patuh per langkah dari total sample.
+      </p>
+    </div>
+
+    <div class="setting-card">
+      <h3>🗑️ Reset Data Lokal</h3>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Hapus semua data tersimpan di perangkat ini.</p>
+      <button class="btn-save-settings" style="background:#ef5350;" onclick="resetData()">🗑️ Reset Semua Data</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL EDIT -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Edit Data Unit</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>UNIT KERJA</label>
+        <input type="text" id="editUnit" readonly style="background:#f5f5f5;">
+      </div>
+      <div class="form-group">
+        <label>JUMLAH SAMPEL OBSERVASI</label>
+        <input type="number" id="editSample" min="0" placeholder="Jumlah sampel">
+      </div>
+      <div class="form-group">
+        <label>KEPATUHAN PER LANGKAH (jumlah yang patuh)</label>
+        <div class="steps-input-grid">
+          <div class="step-input-wrap"><label>Langkah 1</label><input type="number" id="s1" min="0" placeholder="0"></div>
+          <div class="step-input-wrap"><label>Langkah 2</label><input type="number" id="s2" min="0" placeholder="0"></div>
+          <div class="step-input-wrap"><label>Langkah 3</label><input type="number" id="s3" min="0" placeholder="0"></div>
+          <div class="step-input-wrap"><label>Langkah 4</label><input type="number" id="s4" min="0" placeholder="0"></div>
+          <div class="step-input-wrap"><label>Langkah 5</label><input type="number" id="s5" min="0" placeholder="0"></div>
+          <div class="step-input-wrap"><label>Langkah 6</label><input type="number" id="s6" min="0" placeholder="0"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Batal</button>
+      <button class="btn-save" onclick="saveEdit()">💾 Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- INSTALL BANNER -->
+<div class="install-banner" id="installBanner">
+  <span style="font-size:24px">📲</span>
+  <p>Instal aplikasi ini di perangkat Anda untuk akses cepat!</p>
+  <div class="install-actions">
+    <button class="btn-install" onclick="installPWA()">Instal</button>
+    <button class="btn-dismiss" onclick="dismissInstall()">Nanti</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ──
+const UNITS = [
+  'Perkantoran','RM','Keuangan','Front Office/Customer Service',
+  'Cleaning Service','Security','Petugas Parkir','Sopir','Teknisi'
+];
+const STEPS_DESC = [
+  'Ratakan dengan kedua telapak tangan',
+  'Gosok punggung & sela-sela jari tangan kiri dengan tangan kanan dan sebaliknya',
+  'Gosok kedua telapak dan sela-sela jari',
+  'Jari-jari sisi dalam kedua tangan saling mengunci',
+  'Gosok ibu jari kiri berputar dalam genggaman tangan kanan dan sebaliknya',
+  'Gosok ujung jari tangan kanan memutar di telapak tangan kiri dan sebaliknya'
+];
+const DEFAULT_TARGET = 100;
+const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbye9WYCdfMcku8Cmtzfk7tIZePHZtK0aV7dhHL4d7Al0y9WSbOE8aa9Nrr-2oGMoJV-IQ/exec';
+
+function makeEmptyData() {
+  const d = {};
+  UNITS.forEach(u => { d[u] = { sample:0, steps:[0,0,0,0,0,0] }; });
+  return d;
+}
+
+let state = {
+  scriptUrl: localStorage.getItem('hhScriptUrl') || DEFAULT_SCRIPT_URL,
+  targets:   JSON.parse(localStorage.getItem('hhTargets') || 'null') || Object.fromEntries(UNITS.map(u=>[u, DEFAULT_TARGET])),
+  data:      JSON.parse(localStorage.getItem('hhData')    || 'null') || makeEmptyData(),
+  lastSync:  localStorage.getItem('hhLastSync') || null,
+  editUnit:  null
+};
+
+// ── PWA ──
+let deferredPrompt = null;
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); deferredPrompt = e;
+  if (!localStorage.getItem('pwaInstalled'))
+    setTimeout(() => document.getElementById('installBanner').classList.add('visible'), 2500);
+});
+window.addEventListener('appinstalled', () => {
+  localStorage.setItem('pwaInstalled','1');
+  document.getElementById('installBanner').classList.remove('visible');
+  showToast('✅ Aplikasi berhasil diinstal!');
+});
+function installPWA() {
+  if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(()=>{ deferredPrompt=null; }); }
+  document.getElementById('installBanner').classList.remove('visible');
+}
+function dismissInstall() { document.getElementById('installBanner').classList.remove('visible'); }
+
+// ── SYNC ──
+async function syncFromSheet() {
+  const btn = document.getElementById('syncBtn');
+  btn.classList.add('spinning'); btn.disabled = true;
+  hideError();
+  setStatus('dot-yellow', 'Menyinkronkan data...');
+
+  try {
+    const url = state.scriptUrl;
+    if (!url) throw new Error('URL Apps Script belum dikonfigurasi.');
+
+    const controller = new AbortController();
+    const tid = setTimeout(() => controller.abort(), 15000);
+
+    const res = await fetch(url, { signal: controller.signal, cache: 'no-cache' });
+    clearTimeout(tid);
+
+    if (!res.ok) throw new Error(`Server error: HTTP ${res.status}`);
+
+    const text = await res.text();
+    let json;
+    try { json = JSON.parse(text); }
+    catch(e) { throw new Error('Response bukan JSON. Pastikan Apps Script return ContentService.MimeType.JSON'); }
+
+    parseAppsScriptData(json);
+
+    state.lastSync = new Date().toLocaleString('id-ID');
+    localStorage.setItem('hhLastSync', state.lastSync);
+    localStorage.setItem('hhData', JSON.stringify(state.data));
+    document.getElementById('lastSync').textContent = 'Sinkron: ' + state.lastSync;
+    setStatus('dot-green', 'Data berhasil disinkronkan');
+    showToast('✅ Sinkronisasi berhasil');
+    renderAll();
+
+  } catch(err) {
+    let msg = err.message;
+    if (err.name === 'AbortError') msg = 'Timeout! Koneksi lebih dari 15 detik.';
+    else if (msg.includes('Failed to fetch') || msg.includes('NetworkError'))
+      msg = 'Gagal konek ke Apps Script.\n• Pastikan Apps Script sudah di-deploy\n• Akses harus "Anyone"\n• Cek koneksi internet';
+    showError(msg);
+    setStatus('dot-red', 'Gagal sinkron – menampilkan data lokal');
+    showToast('⚠️ Gagal sinkron');
+    renderAll(); // tetap render data lokal
+  } finally {
+    btn.classList.remove('spinning'); btn.disabled = false;
+  }
+}
+
+// ── PARSE APPS SCRIPT RESPONSE ──
+function parseAppsScriptData(json) {
+  let rows = Array.isArray(json) ? json
+           : Array.isArray(json.data) ? json.data
+           : Array.isArray(json.rows) ? json.rows
+           : json.unit ? [json] : null;
+
+  if (!rows) throw new Error('Format JSON tidak dikenali dari Apps Script.');
+  if (rows.length === 0) { showError('Data kosong dari Apps Script.'); return; }
+
+  const fresh = makeEmptyData();
+
+  rows.forEach(row => {
+    if (!row) return;
+    const unitRaw = String(row.unit || row.Unit || row['Unit Kerja'] || row.unit_kerja || '').trim();
+    const unit = UNITS.find(u => u.toLowerCase() === unitRaw.toLowerCase()) || unitRaw;
+    if (!unit) return;
+    if (!fresh[unit]) fresh[unit] = { sample:0, steps:[0,0,0,0,0,0] };
+
+    const sample = parseInt(row.sample || row.Sample || row.total_sample || row.totalSampel || 0) || 0;
+    fresh[unit].sample += sample;
+
+    let steps = [];
+    if (Array.isArray(row.steps))   steps = row.steps.map(Number);
+    else if (Array.isArray(row.langkah)) steps = row.langkah.map(Number);
+    else for (let i=1;i<=6;i++) steps.push(Number(row[`langkah${i}`]??row[`step${i}`]??row[`l${i}`]??0)||0);
+
+    while (steps.length < 6) steps.push(0);
+    steps.forEach((v,i) => {
+      fresh[unit].steps[i] += (v <= 1 && sample > 0) ? v * sample : v;
+    });
+  });
+
+  state.data = fresh;
+}
+
+// ── RENDER ──
+function renderAll() {
+  renderHeader(); renderCards(); renderStepsTable(); renderMatrix(); renderSummary(); renderRanking();
+}
+
+function getCompliance(unit) {
+  const d = state.data[unit];
+  if (!d || d.sample===0) return { pct:0, steps:[0,0,0,0,0,0] };
+  const steps = d.steps.map(s => Math.min(100, Math.round(s/d.sample*100)));
+  return { pct: Math.round(steps.reduce((a,b)=>a+b,0)/6), steps };
+}
+
+function renderHeader() {
+  let ts=0, tp=0, cc=0;
+  UNITS.forEach(u => {
+    ts += state.data[u]?.sample||0;
+    const c = getCompliance(u); tp += c.pct; if(c.pct>=75) cc++;
+  });
+  document.getElementById('hTotalSample').textContent   = ts.toLocaleString('id-ID');
+  document.getElementById('hAvgCompliance').textContent = Math.round(tp/UNITS.length)+'%';
+  document.getElementById('hCompliant').textContent     = cc+'/'+UNITS.length;
+  document.getElementById('bulanLabel').textContent     = new Date().toLocaleString('id-ID',{month:'long',year:'numeric'});
+  if (state.lastSync) document.getElementById('lastSync').textContent = 'Sinkron: '+state.lastSync;
+}
+
+function getBadge(p) { return p>=75?['badge-great','✅ Baik']:p>=50?['badge-good','⚠️ Cukup']:['badge-low','❌ Rendah']; }
+function getFill(p)  { return p>=75?'':p>=50?'warn':'danger'; }
+
+function renderCards() {
+  const grid = document.getElementById('cardsGrid');
+  grid.innerHTML = '';
+  UNITS.forEach((unit,idx) => {
+    const d = state.data[unit]||{sample:0,steps:[0,0,0,0,0,0]};
+    const c = getCompliance(unit);
+    const tgt = state.targets[unit]||DEFAULT_TARGET;
+    const tPct = Math.min(100, Math.round(d.sample/tgt*100));
+    const [bc,bt] = getBadge(c.pct);
+    const dots = c.steps.map((s,i)=>`<div class="step-dot ${s>=75?'done':''}">${i+1}</div>`).join('');
+    const card = document.createElement('div');
+    card.className='unit-card'; card.style.animationDelay=(idx*.06)+'s';
+    card.innerHTML=`
+      <div class="unit-header">
+        <span class="unit-name">🏢 ${unit}</span>
+        <span class="unit-badge ${bc}">${bt}</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-labels"><span>Kepatuhan</span><strong>${c.pct}%</strong></div>
+        <div class="progress-bar"><div class="progress-fill ${getFill(c.pct)}" style="width:${c.pct}%"></div></div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-labels"><span>Sampel: <strong>${d.sample}</strong> / Target: <strong>${tgt}</strong></span><strong>${tPct}%</strong></div>
+        <div class="progress-bar"><div class="progress-fill ${getFill(tPct)}" style="width:${tPct}%"></div></div>
+      </div>
+      <div class="steps-mini">${dots}</div>
+      <div class="unit-footer">
+        <span>🔢 6 langkah dipantau</span>
+        <button class="edit-btn" onclick="openEdit('${unit.replace(/'/g,"\\'")}')">✏️ Edit</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function renderStepsTable() {
+  const tbody = document.getElementById('stepsTableBody');
+  tbody.innerHTML = '';
+  const agg=[0,0,0,0,0,0]; let ts=0;
+  UNITS.forEach(u=>{ const d=state.data[u]; if(!d||!d.sample) return; ts+=d.sample; d.steps.forEach((s,i)=>agg[i]+=s); });
+  STEPS_DESC.forEach((desc,i)=>{
+    const pct = ts>0?Math.min(100,Math.round(agg[i]/ts*100)):0;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><span class="step-num">${i+1}</span></td><td style="font-size:11px">${desc}</td>
+      <td class="pct-bar-cell"><div class="mini-bar"><div class="mini-fill" style="width:${pct}%"></div></div></td>
+      <td style="font-weight:700;font-family:var(--mono);color:${pct>=75?'var(--teal-dark)':pct>=50?'#f57f17':'#c62828'}">${pct}%</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderMatrix() {
+  const thead=document.getElementById('matrixHead'), tbody=document.getElementById('matrixBody');
+  thead.innerHTML=''; tbody.innerHTML='';
+  const hr=document.createElement('tr');
+  hr.innerHTML='<th>Unit</th>'+[1,2,3,4,5,6].map(n=>`<th>L${n}</th>`).join('')+'<th>Rata2</th>';
+  thead.appendChild(hr);
+  UNITS.forEach(u=>{
+    const c=getCompliance(u);
+    const cells=c.steps.map(s=>{
+      const bg=s>=75?'#e8f5e9':s>=50?'#fff8e1':'#fce4ec';
+      const tc=s>=75?'#2e7d32':s>=50?'#f57f17':'#c62828';
+      return `<td style="background:${bg};color:${tc};font-weight:700;font-family:var(--mono);font-size:11px">${s}%</td>`;
+    }).join('');
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-size:11px;font-weight:600">${u}</td>${cells}<td style="font-weight:800;color:var(--teal-dark);font-family:var(--mono);font-size:12px">${c.pct}%</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderSummary() {
+  let ts=0,cg=0,cl=0;
+  UNITS.forEach(u=>{ ts+=state.data[u]?.sample||0; getCompliance(u).pct>=75?cg++:cl++; });
+  const avg=Math.round(UNITS.reduce((a,u)=>a+getCompliance(u).pct,0)/UNITS.length);
+  const tt=Object.values(state.targets).reduce((a,b)=>a+b,0);
+  document.getElementById('summaryGrid').innerHTML=`
+    <div class="sum-card"><div class="val">${ts}</div><div class="lbl">Total Sampel</div></div>
+    <div class="sum-card"><div class="val" style="color:var(--teal)">${avg}%</div><div class="lbl">Rata-rata Kepatuhan</div></div>
+    <div class="sum-card"><div class="val" style="color:#2e7d32">${cg}</div><div class="lbl">Unit ≥ 75%</div></div>
+    <div class="sum-card"><div class="val" style="color:#c62828">${cl}</div><div class="lbl">Unit < 75%</div></div>
+    <div class="sum-card"><div class="val">${tt}</div><div class="lbl">Total Target</div></div>
+    <div class="sum-card"><div class="val" style="color:var(--accent)">${UNITS.length}</div><div class="lbl">Total Unit</div></div>`;
+}
+
+function renderRanking() {
+  const sorted=[...UNITS].sort((a,b)=>getCompliance(b).pct-getCompliance(a).pct);
+  const tbody=document.getElementById('rankingBody'); tbody.innerHTML='';
+  sorted.forEach((u,i)=>{
+    const d=state.data[u]||{sample:0}, c=getCompliance(u);
+    const tgt=state.targets[u]||DEFAULT_TARGET;
+    const tPct=Math.min(100,Math.round(d.sample/tgt*100));
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}`;
+    const col=c.pct>=75?'#2e7d32':c.pct>=50?'#f57f17':'#c62828';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-weight:800;font-size:14px;text-align:center">${medal}</td>
+      <td style="font-weight:600;font-size:12px">${u}</td>
+      <td style="font-family:var(--mono)">${d.sample}</td>
+      <td style="font-family:var(--mono)">${tgt}</td>
+      <td class="pct-bar-cell"><div class="mini-bar"><div class="mini-fill" style="width:${tPct}%;background:linear-gradient(90deg,#027a6d,#5dd5c8)"></div></div></td>
+      <td style="font-weight:800;font-family:var(--mono);color:${col}">${c.pct}%</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ── MODAL EDIT ──
+function openEdit(unit) {
+  state.editUnit=unit;
+  const d=state.data[unit]||{sample:0,steps:[0,0,0,0,0,0]};
+  document.getElementById('modalTitle').textContent='✏️ Edit: '+unit;
+  document.getElementById('editUnit').value=unit;
+  document.getElementById('editSample').value=d.sample;
+  for(let i=1;i<=6;i++) document.getElementById('s'+i).value=d.steps[i-1]||0;
+  document.getElementById('editModal').classList.add('open');
+}
+function closeModal() { document.getElementById('editModal').classList.remove('open'); state.editUnit=null; }
+function saveEdit() {
+  const unit=state.editUnit;
+  const sample=parseInt(document.getElementById('editSample').value)||0;
+  const steps=[1,2,3,4,5,6].map(i=>Math.min(sample,parseInt(document.getElementById('s'+i).value)||0));
+  state.data[unit]={sample,steps};
+  localStorage.setItem('hhData',JSON.stringify(state.data));
+  closeModal(); renderAll(); showToast('✅ Data '+unit+' disimpan');
+}
+
+// ── SETTINGS ──
+function renderTargetRows() {
+  const wrap=document.getElementById('targetRows'); wrap.innerHTML='';
+  UNITS.forEach(u=>{
+    const row=document.createElement('div'); row.className='setting-row';
+    row.innerHTML=`<div><label>${u}</label><small>Target bulanan</small></div>
+      <input type="number" class="target-input" data-unit="${u}" value="${state.targets[u]||DEFAULT_TARGET}" min="1" max="9999">`;
+    wrap.appendChild(row);
+  });
+}
+function saveTargets() {
+  document.querySelectorAll('.target-input').forEach(inp=>{
+    state.targets[inp.dataset.unit]=parseInt(inp.value)||DEFAULT_TARGET;
+  });
+  localStorage.setItem('hhTargets',JSON.stringify(state.targets));
+  renderAll(); showToast('✅ Target disimpan');
+}
+function saveScriptConfig() {
+  const url=document.getElementById('appsScriptUrl').value.trim();
+  if(!url) { showToast('⚠️ URL tidak boleh kosong'); return; }
+  state.scriptUrl=url;
+  localStorage.setItem('hhScriptUrl',url);
+  showToast('✅ URL disimpan, sinkronisasi dimulai...');
+  syncFromSheet();
+}
+function resetData() {
+  if(!confirm('Reset semua data lokal?')) return;
+  localStorage.removeItem('hhData'); localStorage.removeItem('hhLastSync');
+  state.data=makeEmptyData(); state.lastSync=null;
+  document.getElementById('lastSync').textContent='–';
+  renderAll(); showToast('🗑️ Data direset');
+}
+
+// ── TABS ──
+function showTab(name,btn) {
+  ['dashboard','steps','summary','settings'].forEach(t=>{
+    document.getElementById('tab-'+t).classList.toggle('hidden',t!==name);
+  });
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── UTILS ──
+function showToast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg;
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3500);
+}
+function setStatus(cls,txt) {
+  document.getElementById('statusDot').className='status-dot '+cls;
+  document.getElementById('statusText').textContent=txt;
+}
+function showError(msg) { const b=document.getElementById('errorBox'); b.textContent='❌ '+msg; b.classList.add('show'); }
+function hideError() { document.getElementById('errorBox').classList.remove('show'); }
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('appsScriptUrl').value=state.scriptUrl;
+  renderTargetRows();
+  renderAll();
+  syncFromSheet();
+});
+</script>
+</body>
+</html>
