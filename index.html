@@ -402,6 +402,116 @@
   .history-item .hi-header { font-weight:700; color:var(--teal-dark); margin-bottom:3px; }
   .history-item .hi-detail { color:var(--muted); font-size:11px; }
 
+
+  /* ── AUDIT FAB BUTTON ── */
+  .audit-fab {
+    background: white; color: var(--teal-dark);
+    border: none; padding: 8px 14px; border-radius: 10px;
+    font-size: 12px; font-weight: 800; cursor: pointer;
+    font-family: var(--font); transition: .2s; white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  }
+  .audit-fab:hover { background: #e0f7f5; }
+
+  /* ── AUDIT MODAL ── */
+  .audit-overlay {
+    display:none; position:fixed; inset:0;
+    background:rgba(0,30,28,0.5); z-index:1000;
+    align-items:flex-end; justify-content:center;
+    backdrop-filter:blur(4px);
+  }
+  .audit-overlay.open { display:flex; }
+  .audit-modal {
+    background:white; border-radius:24px 24px 0 0;
+    width:100%; max-width:520px;
+    max-height:92vh; overflow-y:auto;
+    box-shadow:0 -8px 40px rgba(0,0,0,.2);
+    animation: slideUpModal .3s cubic-bezier(.4,0,.2,1);
+  }
+  @keyframes slideUpModal {
+    from { transform:translateY(100%); opacity:0; }
+    to   { transform:translateY(0);    opacity:1; }
+  }
+  .audit-modal-header {
+    background:linear-gradient(135deg,var(--teal-dark),var(--teal));
+    color:white; padding:18px 20px 16px;
+    display:flex; align-items:center; justify-content:space-between;
+    border-radius:24px 24px 0 0; position:sticky; top:0; z-index:2;
+  }
+  .audit-modal-header h3 { font-size:15px; font-weight:700; }
+  .audit-modal-close {
+    background:rgba(255,255,255,0.2); border:none; color:white;
+    width:32px; height:32px; border-radius:50%; font-size:18px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .audit-modal-body { padding:16px 20px 24px; }
+
+  .audit-field-group { margin-bottom:13px; }
+  .audit-field-group label {
+    display:block; font-size:11px; font-weight:700;
+    color:var(--muted); margin-bottom:5px; text-transform:uppercase; letter-spacing:.4px;
+  }
+  .audit-field-group input,
+  .audit-field-group select {
+    width:100%; padding:11px 14px; border:1.5px solid var(--border);
+    border-radius:10px; font-size:13px; font-family:var(--font);
+    outline:none; transition:.2s; color:var(--text); background:white;
+  }
+  .audit-field-group input:focus,
+  .audit-field-group select:focus { border-color:var(--teal); }
+  .audit-row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  .audit-divider {
+    font-size:12px; font-weight:700; color:var(--teal-dark);
+    margin:16px 0 10px; padding-bottom:8px;
+    border-bottom:1.5px solid var(--border);
+  }
+
+  .step-check-item {
+    display:flex; align-items:center; gap:10px;
+    padding:10px 12px; border-radius:12px; margin-bottom:7px;
+    border:1.5px solid var(--border); background:#fafffe; transition:.15s;
+  }
+  .step-check-item.checked   { background:#e8f5e9; border-color:#81c784; }
+  .step-check-item.unchecked { background:#fce4ec; border-color:#ef9a9a; }
+  .step-num-badge {
+    width:26px; height:26px; border-radius:50%;
+    background:var(--teal); color:white; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:800;
+  }
+  .step-check-item.checked   .step-num-badge { background:#2e7d32; }
+  .step-check-item.unchecked .step-num-badge { background:#c62828; }
+  .step-desc { flex:1; font-size:11px; line-height:1.4; color:var(--text); }
+  .step-toggle { display:flex; gap:5px; }
+  .toggle-btn {
+    width:34px; height:34px; border-radius:9px; border:1.5px solid var(--border);
+    background:white; font-size:15px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:.15s;
+  }
+  .toggle-btn.active-yes { background:#e8f5e9; border-color:#81c784; }
+  .toggle-btn.active-no  { background:#fce4ec; border-color:#ef9a9a; }
+
+  .audit-score-bar {
+    background:var(--teal-light); border-radius:12px; padding:14px;
+    margin:14px 0; display:flex; align-items:center; gap:14px;
+  }
+  .audit-score-pct {
+    font-size:32px; font-weight:800; line-height:1; min-width:60px; text-align:center;
+  }
+  .audit-score-detail { flex:1; font-size:12px; color:var(--muted); line-height:1.7; }
+  .audit-score-detail strong { color:var(--text); }
+
+  .btn-submit-audit {
+    width:100%; padding:14px; background:linear-gradient(135deg,var(--teal-dark),var(--teal));
+    color:white; border:none; border-radius:12px; font-size:14px; font-weight:700;
+    cursor:pointer; font-family:var(--font);
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    box-shadow:0 4px 16px rgba(4,176,156,.3); transition:.2s;
+  }
+  .btn-submit-audit:hover { box-shadow:0 6px 20px rgba(4,176,156,.4); }
+  .btn-submit-audit:disabled { opacity:.6; cursor:not-allowed; }
+
   .hidden { display:none !important; }
   .fade-section { animation:fadeUp .35s ease; }
 </style>
@@ -418,9 +528,14 @@
         <small>Dashboard Pemantauan Kepatuhan</small>
       </div>
     </div>
-    <button class="sync-btn" onclick="syncFromSheet()" id="syncBtn">
-      <span class="spin-icon">🔄</span> Sinkron
-    </button>
+    <div style="display:flex;gap:8px;flex-shrink:0">
+      <button class="audit-fab" onclick="openAuditModal()" title="Tambah Audit">
+        ＋ Audit
+      </button>
+      <button class="sync-btn" onclick="syncFromSheet()" id="syncBtn">
+        <span class="spin-icon">🔄</span>
+      </button>
+    </div>
   </div>
   <div class="header-stats">
     <div class="hstat"><div class="hstat-val" id="hTotalSample">–</div><div class="hstat-lbl">Total Sampel</div></div>
@@ -434,7 +549,6 @@
   <button class="tab-btn active" onclick="showTab('dashboard', this)">📊 Dashboard</button>
   <button class="tab-btn" onclick="showTab('steps', this)">📋 Per Langkah</button>
   <button class="tab-btn" onclick="showTab('summary', this)">📈 Ringkasan</button>
-  <button class="tab-btn" onclick="showTab('audit', this)">✍️ Form Audit</button>
   <button class="tab-btn" onclick="showTab('settings', this)">⚙️ Pengaturan</button>
 </div>
 
@@ -481,15 +595,8 @@
     <div class="section-title"><h2>Ringkasan Keseluruhan</h2></div>
     <div class="summary-grid" id="summaryGrid"></div>
 
-    <div class="steps-table-wrap">
-      <div class="steps-table-header">🏆 Ranking Unit Kerja</div>
-      <table>
-        <thead><tr><th>#</th><th>Unit</th><th>Sampel</th><th>Target</th><th class="pct-bar-cell">Progress</th><th>Kepatuhan</th></tr></thead>
-        <tbody id="rankingBody"></tbody>
-      </table>
-    </div>
-
-    <div class="section-title" style="margin-top:8px">
+    <!-- REKAP DI ATAS RANKING -->
+    <div class="section-title" style="margin-top:4px">
       <h2>📋 Rekap Laporan per Unit</h2>
       <span id="rekapBulan">-</span>
     </div>
@@ -526,15 +633,19 @@
       <div style="padding:16px 12px" id="chartWrap"></div>
     </div>
 
-  </div>
-
-
-  <!-- TAB AUDIT FORM -->
-  <div id="tab-audit" class="hidden fade-section">
-    <div class="section-title">
-      <h2>✍️ Form Audit Kebersihan Tangan</h2>
+    <!-- RANKING DI BAWAH REKAP -->
+    <div class="section-title" style="margin-top:4px">
+      <h2>🏆 Ranking Unit Kerja</h2>
+    </div>
+    <div class="steps-table-wrap">
+      <div class="steps-table-header">🏆 Ranking Unit Kerja</div>
+      <table>
+        <thead><tr><th>#</th><th>Unit</th><th>Sampel</th><th>Target</th><th class="pct-bar-cell">Progress</th><th>Kepatuhan</th></tr></thead>
+        <tbody id="rankingBody"></tbody>
+      </table>
     </div>
 
+  </div>
     <div class="audit-card">
       <div class="audit-section-title">📋 Informasi Observasi</div>
 
@@ -665,6 +776,65 @@
     <div class="modal-footer">
       <button class="btn-cancel" onclick="closeModal()">Batal</button>
       <button class="btn-save" onclick="saveEdit()">💾 Simpan</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════ AUDIT MODAL ══════════════ -->
+<div class="audit-overlay" id="auditOverlay" onclick="closeAuditIfBg(event)">
+  <div class="audit-modal" id="auditModal">
+    <div class="audit-modal-header">
+      <h3>✍️ Form Audit Cuci Tangan</h3>
+      <button class="audit-modal-close" onclick="closeAuditModal()">✕</button>
+    </div>
+    <div class="audit-modal-body">
+
+      <div class="audit-row2">
+        <div class="audit-field-group">
+          <label>Tanggal</label>
+          <input type="date" id="auditTanggal">
+        </div>
+        <div class="audit-field-group">
+          <label>Unit Kerja</label>
+          <select id="auditUnit">
+            <option value="">-- Pilih --</option>
+            <option>Perkantoran</option>
+            <option>RM</option>
+            <option>Keuangan</option>
+            <option>Front Office/Customer Service</option>
+            <option>Cleaning Service</option>
+            <option>Security</option>
+            <option>Petugas Parkir</option>
+            <option>Sopir</option>
+            <option>Teknisi</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="audit-row2">
+        <div class="audit-field-group">
+          <label>Nama Observer</label>
+          <input type="text" id="auditObserver" placeholder="Nama observer">
+        </div>
+        <div class="audit-field-group">
+          <label>Petugas (Inisial)</label>
+          <input type="text" id="auditPetugas" placeholder="Cth: BW">
+        </div>
+      </div>
+
+      <div class="audit-divider">🖐️ Penilaian 6 Langkah</div>
+      <div id="auditStepList"></div>
+
+      <div class="audit-score-bar" id="auditScoreBar" style="display:none">
+        <div class="audit-score-pct" id="auditScorePct">0%</div>
+        <div class="audit-score-detail" id="auditScoreDetail">–</div>
+      </div>
+
+      <button class="btn-submit-audit" id="btnSubmitAudit" onclick="submitAudit()">
+        <span id="submitIcon">📤</span> Kirim & Simpan ke Sheet
+      </button>
+
     </div>
   </div>
 </div>
@@ -1105,158 +1275,135 @@ function renderChart() {
 }
 
 
-// ── AUDIT FORM ──
+// ── AUDIT MODAL ──
 const STEPS_SHORT = [
-  'Ratakan telapak tangan',
-  'Gosok punggung & sela jari',
-  'Gosok kedua telapak & sela jari',
-  'Kunci jari sisi dalam',
-  'Gosok ibu jari berputar',
-  'Gosok ujung jari memutar'
+  'Ratakan kedua telapak tangan',
+  'Gosok punggung & sela-sela jari',
+  'Gosok kedua telapak & sela-sela jari',
+  'Kunci jari-jari sisi dalam',
+  'Gosok ibu jari kiri berputar (dan sebaliknya)',
+  'Gosok ujung jari memutar di telapak (dan sebaliknya)'
 ];
 
-let auditState = { steps: [null,null,null,null,null,null] };
-let auditHistory = JSON.parse(localStorage.getItem('hhAuditHistory') || '[]');
+let auditSteps = [null,null,null,null,null,null];
+let auditHistory = [];
 
-function initAuditForm() {
-  // Set default tanggal hari ini
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('auditTanggal').value = today;
+function openAuditModal() {
+  auditSteps = [null,null,null,null,null,null];
 
-  // Render step checklist
-  const list = document.getElementById('stepChecklist');
-  list.innerHTML = '';
-  auditState.steps = [null,null,null,null,null,null];
+  // Set tanggal hari ini
+  document.getElementById('auditTanggal').value = new Date().toISOString().split('T')[0];
+  document.getElementById('auditObserver').value = '';
+  document.getElementById('auditPetugas').value  = '';
+  document.getElementById('auditUnit').value     = '';
 
-  STEPS_SHORT.forEach((desc, i) => {
-    const item = document.createElement('div');
-    item.className = 'step-check-item';
-    item.id = 'stepItem' + i;
-    item.innerHTML = `
+  // Render step list
+  const list = document.getElementById('auditStepList');
+  list.innerHTML = STEPS_SHORT.map((desc,i) => `
+    <div class="step-check-item" id="sci${i}">
       <div class="step-num-badge">${i+1}</div>
       <div class="step-desc">${desc}</div>
       <div class="step-toggle">
-        <button class="toggle-btn" id="btnYes${i}" onclick="setStep(${i},true)" title="Patuh">✅</button>
-        <button class="toggle-btn" id="btnNo${i}"  onclick="setStep(${i},false)" title="Tidak Patuh">❌</button>
-      </div>`;
-    list.appendChild(item);
-  });
+        <button class="toggle-btn" id="tY${i}" onclick="setAuditStep(${i},true)">✅</button>
+        <button class="toggle-btn" id="tN${i}" onclick="setAuditStep(${i},false)">❌</button>
+      </div>
+    </div>`).join('');
 
-  updateAuditSummary();
-  renderAuditHistory();
+  document.getElementById('auditScoreBar').style.display = 'none';
+  document.getElementById('auditOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
-function setStep(idx, val) {
-  auditState.steps[idx] = val;
-  const item = document.getElementById('stepItem' + idx);
-  const btnY = document.getElementById('btnYes' + idx);
-  const btnN = document.getElementById('btnNo' + idx);
-
-  item.classList.remove('checked','unchecked');
-  btnY.classList.remove('active-yes');
-  btnN.classList.remove('active-no');
-
-  if (val === true)  { item.classList.add('checked');   btnY.classList.add('active-yes'); }
-  if (val === false) { item.classList.add('unchecked');  btnN.classList.add('active-no'); }
-
-  updateAuditSummary();
+function closeAuditModal() {
+  document.getElementById('auditOverlay').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
-function updateAuditSummary() {
-  const answered = auditState.steps.filter(s => s !== null);
-  const patuh    = auditState.steps.filter(s => s === true).length;
-  const total    = 6;
-  const pct      = answered.length > 0 ? Math.round(patuh / total * 100) : 0;
+function closeAuditIfBg(e) {
+  if (e.target === document.getElementById('auditOverlay')) closeAuditModal();
+}
 
-  const card = document.getElementById('auditSummaryCard');
-  const res  = document.getElementById('auditResult');
+function setAuditStep(idx, val) {
+  auditSteps[idx] = val;
+  const item = document.getElementById('sci' + idx);
+  const btnY = document.getElementById('tY' + idx);
+  const btnN = document.getElementById('tN' + idx);
 
-  if (answered.length === 0) { card.style.display='none'; return; }
-  card.style.display = 'block';
+  item.classList.toggle('checked',   val === true);
+  item.classList.toggle('unchecked', val === false);
+  btnY.classList.toggle('active-yes', val === true);
+  btnN.classList.toggle('active-no',  val === false);
 
-  const col = pct>=75?'#2e7d32':pct>=50?'#f57f17':'#c62828';
-  const status = pct>=75?'✅ Patuh / Baik':pct>=50?'⚠️ Cukup':'❌ Tidak Patuh';
-  res.innerHTML = `
-    <div class="audit-result-grid">
-      <div class="audit-result-item">
-        <div class="val">${patuh}</div><div class="lbl">Langkah Patuh</div>
-      </div>
-      <div class="audit-result-item">
-        <div class="val">${total - patuh}</div><div class="lbl">Tidak Patuh</div>
-      </div>
-      <div class="audit-result-item">
-        <div class="val" style="color:${col}">${pct}%</div><div class="lbl">Kepatuhan</div>
-      </div>
-    </div>
-    <div style="text-align:center;font-size:14px;font-weight:700;color:${col}">${status}</div>`;
+  updateAuditScore();
+}
+
+function updateAuditScore() {
+  const answered = auditSteps.filter(s => s !== null).length;
+  if (answered === 0) { document.getElementById('auditScoreBar').style.display='none'; return; }
+
+  const patuh = auditSteps.filter(s => s === true).length;
+  const pct   = Math.round(patuh / 6 * 100);
+  const col   = pct>=75?'#2e7d32':pct>=50?'#f57f17':'#c62828';
+  const label = pct>=75?'✅ Patuh / Baik':pct>=50?'⚠️ Cukup':'❌ Tidak Patuh';
+
+  document.getElementById('auditScoreBar').style.display  = 'flex';
+  document.getElementById('auditScorePct').style.color    = col;
+  document.getElementById('auditScorePct').textContent    = pct + '%';
+  document.getElementById('auditScoreDetail').innerHTML   =
+    `<strong>${patuh} dari 6</strong> langkah patuh<br>${label}<br>${6-answered > 0 ? `<span style="color:#f57f17">${6-answered} langkah belum dinilai</span>` : '<span style="color:#2e7d32">Semua langkah sudah dinilai</span>'}`;
 }
 
 async function submitAudit() {
-  // Validasi
   const tanggal  = document.getElementById('auditTanggal').value;
   const observer = document.getElementById('auditObserver').value.trim();
   const petugas  = document.getElementById('auditPetugas').value.trim();
   const unit     = document.getElementById('auditUnit').value;
 
-  if (!tanggal || !observer || !unit) {
-    showToast('⚠️ Isi Tanggal, Nama Observer, dan Unit terlebih dahulu'); return;
-  }
-  if (auditState.steps.some(s => s === null)) {
-    showToast('⚠️ Lengkapi semua 6 langkah terlebih dahulu'); return;
+  if (!tanggal)  { showToast('⚠️ Isi tanggal terlebih dahulu'); return; }
+  if (!observer) { showToast('⚠️ Isi nama observer terlebih dahulu'); return; }
+  if (!unit)     { showToast('⚠️ Pilih unit kerja terlebih dahulu'); return; }
+  if (auditSteps.some(s => s === null)) {
+    showToast('⚠️ Lengkapi semua 6 langkah penilaian'); return;
   }
 
   const btn = document.getElementById('btnSubmitAudit');
   btn.disabled = true;
   document.getElementById('submitIcon').textContent = '⏳';
 
-  const stepsVal = auditState.steps.map(s => s ? 1 : 0);
+  const stepsVal = auditSteps.map(s => s ? 1 : 0);
   const patuh    = stepsVal.reduce((a,b)=>a+b,0);
   const pct      = Math.round(patuh/6*100);
 
-  // Payload ke Apps Script (POST)
   const payload = {
-    tanggal,
-    namaObserver: observer,
-    namaPetugas:  petugas || '-',
-    unit,
-    langkah1: stepsVal[0], langkah2: stepsVal[1], langkah3: stepsVal[2],
-    langkah4: stepsVal[3], langkah5: stepsVal[4], langkah6: stepsVal[5],
-    // Untuk kompatibilitas format lama
-    steps:  stepsVal,
-    sample: 1,
-    petugas: petugas || '-',
-    keterangan: ''
+    tanggal, namaObserver: observer, namaPetugas: petugas||'-',
+    unit, steps: stepsVal, sample: 1,
+    langkah1:stepsVal[0], langkah2:stepsVal[1], langkah3:stepsVal[2],
+    langkah4:stepsVal[3], langkah5:stepsVal[4], langkah6:stepsVal[5]
   };
 
   try {
-    const res = await fetch(state.scriptUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      mode: 'no-cors' // Google Apps Script butuh ini
+    await fetch(state.scriptUrl, {
+      method:'POST', body:JSON.stringify(payload),
+      headers:{'Content-Type':'application/json'}, mode:'no-cors'
     });
 
-    // no-cors tidak return response body — anggap berhasil jika tidak error
-    showToast('✅ Data berhasil dikirim ke Google Sheets!');
-
-    // Simpan ke history lokal
-    const record = { tanggal, observer, petugas: petugas||'-', unit, steps:stepsVal, pct, time: new Date().toLocaleTimeString('id-ID') };
-    auditHistory.unshift(record);
-    if (auditHistory.length > 20) auditHistory.pop();
-    localStorage.setItem('hhAuditHistory', JSON.stringify(auditHistory));
-
-    // Update data lokal segera
+    // Update data lokal langsung
     if (!state.data[unit]) state.data[unit] = {sample:0, steps:[0,0,0,0,0,0]};
     state.data[unit].sample += 1;
     stepsVal.forEach((v,i) => state.data[unit].steps[i] += v);
     localStorage.setItem('hhData', JSON.stringify(state.data));
+
+    // Simpan ke riwayat
+    auditHistory.unshift({ tanggal, observer, petugas:petugas||'-', unit, steps:stepsVal, pct,
+      time: new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}) });
+    if (auditHistory.length > 50) auditHistory.pop();
+    localStorage.setItem('hhAuditHistory', JSON.stringify(auditHistory));
+
+    showToast('✅ Audit berhasil disimpan!');
+    closeAuditModal();
     renderAll();
 
-    // Reset form
-    initAuditForm();
-    renderAuditHistory();
-
-    // Auto sync setelah 2 detik
+    // Sync ulang setelah 2 detik
     setTimeout(() => syncFromSheet(), 2000);
 
   } catch(err) {
@@ -1267,32 +1414,13 @@ async function submitAudit() {
   }
 }
 
-function renderAuditHistory() {
-  const wrap = document.getElementById('auditHistory');
-  if (!auditHistory.length) {
-    wrap.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">Belum ada audit.</div>';
-    return;
-  }
-  wrap.innerHTML = auditHistory.slice(0,10).map(r => {
-    const col = r.pct>=75?'#2e7d32':r.pct>=50?'#f57f17':'#c62828';
-    return `<div class="history-item">
-      <div class="hi-header">🏢 ${r.unit} <span style="float:right;color:${col};font-weight:800">${r.pct}%</span></div>
-      <div class="hi-detail">
-        👤 ${r.observer} &nbsp;|&nbsp; 🪪 ${r.petugas} &nbsp;|&nbsp; 🕐 ${r.time || r.tanggal}<br>
-        L1:${r.steps[0]} L2:${r.steps[1]} L3:${r.steps[2]} L4:${r.steps[3]} L5:${r.steps[4]} L6:${r.steps[5]}
-      </div>
-    </div>`;
-  }).join('');
-}
-
 // ── TABS ──
 function showTab(name,btn) {
-  ['dashboard','steps','summary','audit','settings'].forEach(t=>{
+  ['dashboard','steps','summary','settings'].forEach(t=>{
     document.getElementById('tab-'+t).classList.toggle('hidden',t!==name);
   });
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  if(name==='audit') initAuditForm();
 }
 
 // ── UTILS ──
@@ -1310,10 +1438,11 @@ function hideError() { document.getElementById('errorBox').classList.remove('sho
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('appsScriptUrl').value=state.scriptUrl;
+  auditHistory = JSON.parse(localStorage.getItem('hhAuditHistory') || '[]');
   renderTargetRows();
   renderAll();
   syncFromSheet();
-  auditHistory = JSON.parse(localStorage.getItem('hhAuditHistory') || '[]');
+
 });
 </script>
 </body>
