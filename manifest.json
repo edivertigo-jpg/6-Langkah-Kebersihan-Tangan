@@ -1,13 +1,12 @@
 {
-  "name": "Dashboard Kebersihan Tangan 6 Langkah",
-  "short_name": "Hand Hygiene",
-  "description": "Pemantauan kepatuhan cuci tangan 6 langkah per unit kerja",
+  "name": "Audit Kebersihan Tangan",
+  "short_name": "Audit HH",
+  "description": "Dashboard audit kebersihan tangan 6 langkah",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#04b09c",
-  "theme_color": "#04b09c",
-  "orientation": "any",
-  "lang": "id",
+  "background_color": "#0d3b66",
+  "theme_color": "#0d3b66",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "icon-192.png",
@@ -21,5 +20,7 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "categories": ["medical", "health", "utilities"],
+  "lang": "id"
 }
