@@ -870,6 +870,7 @@ tbody td {
             <th>L1</th><th>L2</th><th>L3</th>
             <th>L4</th><th>L5</th><th>L6</th>
             <th>Keterangan</th>
+            <th>Aksi</th>
           </tr>
         </thead>
         <tbody id="rekap-tbody">
@@ -956,7 +957,7 @@ tbody td {
 // ============================================================
 // KONFIGURASI — GANTI URL INI SETELAH DEPLOY APPS SCRIPT
 // ============================================================
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbz5ILC31RAJ3ftqpzu_u0CMADfAFuFPOMhNZzvw_R_r_31fwz63KPcImqV2gJTERwnk/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzmsECtoKxmnZMmg8dG-pvjMiVlWtOxE5ZAyR34k2BwlWvpLLDmmThaVev9DVxEcv4loA/exec';
 
 // ============================================================
 // DAFTAR UNIT TETAP
@@ -1200,8 +1201,9 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
   }
 
   const btn = document.getElementById('btn-submit');
+  const isEdit = btn.dataset.mode === 'edit';
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Menyimpan...';
+  btn.innerHTML = `<span class="spinner"></span> ${isEdit ? 'Mengupdate...' : 'Menyimpan...'}`;
 
   const payload = {
     tanggal, unit, namaObserver: observer, namaPetugas: petugas,
@@ -1210,14 +1212,19 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
     langkah5: state.langkah[5], langkah6: state.langkah[6]
   };
 
+  // Kalau mode edit, tambahkan rowId untuk matching di GAS
+  if (isEdit && editingIdx !== null) {
+    const orig = currentTableData[editingIdx];
+    payload.rowId = orig.no;
+  }
+
   try {
-    const res = await gasPost('addData', payload);
+    const action = isEdit ? 'updateData' : 'addData';
+    const res = await gasPost(action, payload);
     if (res.status === 'success') {
-      showToast(`✅ Tersimpan — ${res.keterangan}`, 'success');
-      resetForm();
-      closeModal();
+      showToast(`✅ ${isEdit ? 'Diupdate' : 'Tersimpan'} — ${res.keterangan}`, 'success');
+      closeEditModal();
       loadFilters();
-      // Refresh dashboard & rekap di background
       loadDashboard();
       loadRekap();
     } else {
@@ -1227,7 +1234,7 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
     showToast('❌ Error: ' + e.message, 'error');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<span>💾</span> Simpan Data Audit';
+    btn.innerHTML = isEdit ? '<span>💾</span> Update Data Audit' : '<span>💾</span> Simpan Data Audit';
   }
 });
 
@@ -1313,14 +1320,17 @@ async function loadRekap() {
   }
 }
 
+let currentTableData = [];
+
 function renderTable(data) {
+  currentTableData = data;
   const tbody = document.getElementById('rekap-tbody');
   if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="12" class="empty-state"><span class="icon">📋</span><p>Tidak ada data ditemukan</p></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="13" class="empty-state"><span class="icon">📋</span><p>Tidak ada data ditemukan</p></td></tr>`;
     return;
   }
   tbody.innerHTML = data.map((d, idx) => `
-    <tr>
+    <tr id="row-${idx}">
       <td>${idx + 1}</td>
       <td>${d.tanggal}</td>
       <td style="text-align:left">${d.namaObserver}</td>
@@ -1330,7 +1340,89 @@ function renderTable(data) {
         ? '<span class="badge badge-ya">Ya</span>'
         : '<span class="badge badge-tidak-s">Tdk</span>'}</td>`).join('')}
       <td><span class="badge ${d.keterangan === 'Patuh' ? 'badge-patuh' : 'badge-tidak'}">${d.keterangan}</span></td>
+      <td style="white-space:nowrap">
+        <button onclick="openEditModal(${idx})" style="background:var(--blue);color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;margin-right:4px">✏️ Edit</button>
+        <button onclick="deleteRow(${idx})" style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer">🗑️ Hapus</button>
+      </td>
     </tr>`).join('');
+}
+
+// ============================================================
+// DELETE ROW
+// ============================================================
+async function deleteRow(idx) {
+  const d = currentTableData[idx];
+  if (!confirm(`Hapus data audit:\n${d.namaPetugas} — ${d.tanggal} — ${d.unit}?`)) return;
+  try {
+    const res = await gasPost('deleteData', {
+      rowId: d.no,
+      namaPetugas: d.namaPetugas,
+      namaObserver: d.namaObserver,
+      unit: d.unit
+    });
+    if (res.status === 'success') {
+      showToast('✅ Data berhasil dihapus', 'success');
+      loadRekap();
+      loadDashboard();
+    } else {
+      showToast('❌ Gagal hapus: ' + res.message, 'error');
+    }
+  } catch(e) {
+    showToast('❌ Error: ' + e.message, 'error');
+  }
+}
+
+// ============================================================
+// EDIT MODAL
+// ============================================================
+let editingIdx = null;
+
+function openEditModal(idx) {
+  editingIdx = idx;
+  const d = currentTableData[idx];
+
+  // Isi field
+  document.getElementById('f-tanggal').value = d.tanggal
+    ? d.tanggal.split('/').reverse().join('-') : '';
+  document.getElementById('f-unit').value = d.unit;
+  document.getElementById('f-observer').value = d.namaObserver;
+  document.getElementById('f-petugas').value = d.namaPetugas;
+
+  // Reset langkah state
+  state.langkah = { 1: null, 2: null, 3: null, 4: null, 5: null, 6: null };
+  buildLangkahGrid();
+
+  // Set nilai langkah sesuai data
+  for (let i = 1; i <= 6; i++) {
+    const val = d['langkah' + i];
+    state.langkah[i] = val;
+    const body = document.querySelector(`#langkah-grid .langkah-item:nth-child(${i}) .langkah-body`);
+    if (body) {
+      body.querySelectorAll('.toggle-btn').forEach(b => {
+        b.classList.remove('active');
+        if (b.dataset.val === val) b.classList.add('active');
+      });
+    }
+  }
+
+  updateKeteranganPreview();
+
+  // Ganti tombol submit jadi Update
+  const btn = document.getElementById('btn-submit');
+  btn.innerHTML = '<span>💾</span> Update Data Audit';
+  btn.dataset.mode = 'edit';
+
+  document.getElementById('modal-input').classList.add('open');
+  document.querySelector('.modal-sheet').scrollTop = 0;
+}
+
+function closeEditModal() {
+  editingIdx = null;
+  const btn = document.getElementById('btn-submit');
+  btn.innerHTML = '<span>💾</span> Simpan Data Audit';
+  btn.dataset.mode = 'add';
+  resetForm();
+  closeModal();
 }
 
 document.getElementById('rek-apply').addEventListener('click', loadRekap);
@@ -1437,6 +1529,14 @@ function openModal() {
 
 function closeModal() {
   document.getElementById('modal-input').classList.remove('open');
+  // Reset mode ke add jika close dari tombol X / overlay
+  const btn = document.getElementById('btn-submit');
+  if (btn.dataset.mode === 'edit') {
+    editingIdx = null;
+    btn.dataset.mode = 'add';
+    btn.innerHTML = '<span>💾</span> Simpan Data Audit';
+    resetForm();
+  }
 }
 
 // btn-open-input removed (moved to sidebar)
