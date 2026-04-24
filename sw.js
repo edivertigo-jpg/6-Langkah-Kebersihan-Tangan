@@ -1,36 +1,43 @@
 // sw.js — Service Worker Audit Kebersihan Tangan
-const CACHE_NAME = 'audit-hh-v1';
+const CACHE_NAME = 'audit-hh-v2';  // ← bump versi = cache lama otomatis dihapus
 const STATIC_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './logo_surya-removebg-preview.png'
 ];
 
-// Install: cache aset statis
+// Install: cache aset statis baru
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       return cache.addAll(STATIC_ASSETS);
     })
   );
+  // Langsung aktif tanpa tunggu tab lama tutup
   self.skipWaiting();
 });
 
-// Activate: hapus cache lama
+// Activate: hapus SEMUA cache lama
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+        keys.filter(k => k !== CACHE_NAME).map(k => {
+          console.log('[SW] Hapus cache lama:', k);
+          return caches.delete(k);
+        })
       )
-    )
+    ).then(() => {
+      // Ambil alih semua tab yang terbuka sekarang
+      return self.clients.claim();
+    })
   );
-  self.clients.claim();
 });
 
-// Fetch: cache-first untuk aset statis, network-first untuk API
+// Fetch: network-first untuk HTML (selalu fresh), cache-first untuk aset lain
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
@@ -46,7 +53,21 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Aset statis → cache first
+  // index.html → network-first agar selalu dapat versi terbaru
+  if (url.pathname.endsWith('/') || url.pathname.endsWith('index.html')) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Aset statis lain → cache-first
   event.respondWith(
     caches.match(event.request).then(cached => {
       return cached || fetch(event.request).then(response => {
@@ -60,7 +81,7 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// Background sync untuk data pending (opsional)
+// Background sync
 self.addEventListener('sync', event => {
   if (event.tag === 'sync-audit') {
     event.waitUntil(syncPendingData());
@@ -68,7 +89,6 @@ self.addEventListener('sync', event => {
 });
 
 async function syncPendingData() {
-  // Kirim notifikasi ke semua client bahwa sync selesai
   const clients = await self.clients.matchAll();
   clients.forEach(client => client.postMessage({ type: 'SYNC_COMPLETE' }));
 }
