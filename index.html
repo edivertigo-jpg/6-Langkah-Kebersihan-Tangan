@@ -1601,8 +1601,32 @@ document.getElementById('btn-install').addEventListener('click', async () => {
 // SERVICE WORKER
 // ============================================================
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').then(() => {
+  navigator.serviceWorker.register('./sw.js').then(reg => {
     console.log('SW registered');
+
+    // Cek update setiap kali halaman dibuka
+    reg.update();
+
+    // Kalau ada SW baru yang waiting → paksa dia langsung aktif
+    reg.addEventListener('updatefound', () => {
+      const newSW = reg.installing;
+      newSW.addEventListener('statechange', () => {
+        if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+          // Ada versi baru siap → kirim pesan skipWaiting ke SW baru
+          newSW.postMessage({ type: 'SKIP_WAITING' });
+        }
+      });
+    });
+  });
+
+  // Begitu SW baru ambil alih (controllerchange) → reload otomatis
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+      refreshing = true;
+      console.log('SW baru aktif, reload halaman...');
+      window.location.reload();
+    }
   });
 
   navigator.serviceWorker.addEventListener('message', e => {

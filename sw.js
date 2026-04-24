@@ -16,8 +16,7 @@ self.addEventListener('install', event => {
       return cache.addAll(STATIC_ASSETS);
     })
   );
-  // Langsung aktif tanpa tunggu tab lama tutup
-  self.skipWaiting();
+  // TIDAK skipWaiting di sini — dikendalikan halaman via postMessage SKIP_WAITING
 });
 
 // Activate: hapus SEMUA cache lama
@@ -79,6 +78,13 @@ self.addEventListener('fetch', event => {
       });
     })
   );
+});
+
+// Terima perintah SKIP_WAITING dari halaman → langsung aktif
+self.addEventListener('message', event => {
+  if (event.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // Background sync
