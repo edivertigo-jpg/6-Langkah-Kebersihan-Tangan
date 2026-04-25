@@ -1,5 +1,5 @@
 // sw.js — Service Worker Audit Kebersihan Tangan
-const CACHE_NAME = 'audit-hh-v2';  // ← bump versi = cache lama otomatis dihapus
+const CACHE_NAME = 'audit-hh-v3';  // ← bump versi = cache lama otomatis dihapus
 const STATIC_ASSETS = [
   './',
   './index.html',
