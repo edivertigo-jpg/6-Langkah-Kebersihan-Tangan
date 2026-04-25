@@ -686,6 +686,7 @@ tbody td {
   .modal-sheet { border-radius: 20px; max-height: 88vh; }
 }
 </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 
 <body>
@@ -871,6 +872,7 @@ tbody td {
         </select>
       </div>
       <button class="btn-filter" id="rek-apply">Cari</button>
+      <button class="btn-filter" id="btn-export" onclick="exportExcel()" style="background:var(--green);display:none">⬇️ Export Excel</button>
     </div>
 
     <div class="table-wrap">
@@ -1329,6 +1331,7 @@ async function loadRekap() {
     if (res.status === 'success') {
       renderTable(res.data);
       info.textContent = `Menampilkan ${res.data.length} data`;
+      document.getElementById('btn-export').style.display = res.data.length > 0 ? '' : 'none';
     }
   } catch (e) {
     tbody.innerHTML = `<tr><td colspan="12" class="empty-state"><p>❌ Gagal memuat data</p></td></tr>`;
@@ -1360,6 +1363,102 @@ function renderTable(data) {
         <button onclick="deleteRow(${idx})" style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer">🗑️ Hapus</button>
       </td>
     </tr>`).join('');
+}
+
+// ============================================================
+// EXPORT EXCEL
+// ============================================================
+function exportExcel() {
+  if (!currentTableData || currentTableData.length === 0) {
+    showToast('⚠️ Tidak ada data untuk diekspor', 'error');
+    return;
+  }
+
+  // Ambil info filter untuk nama file
+  const unitEl  = document.getElementById('rek-unit');
+  const tahunEl = document.getElementById('rek-tahun');
+  const bulanEl = document.getElementById('rek-bulan');
+  const unitLabel  = unitEl.options[unitEl.selectedIndex].text;
+  const tahunLabel = tahunEl.options[tahunEl.selectedIndex].text;
+  const bulanLabel = bulanEl.options[bulanEl.selectedIndex].text;
+
+  // Nama bulan Indonesia untuk nama file
+  const namaBulan = ['','Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  const bulanVal  = bulanEl.value;
+  const bulanStr  = bulanVal === 'all' ? 'Semua-Bulan' : namaBulan[parseInt(bulanVal)];
+  const tahunStr  = tahunEl.value === 'all' ? 'Semua-Tahun' : tahunEl.value;
+  const unitStr   = unitEl.value === 'all' ? 'Semua-Unit' : unitEl.value.replace(/\s+/g, '-');
+
+  // Buat header sheet info
+  const now = new Date();
+  const tglExport = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
+
+  // Baris judul dan info
+  const titleRows = [
+    ['REKAP AUDIT KEBERSIHAN TANGAN 6 LANGKAH WHO'],
+    ['RSU Surya Husadha Nusa Dua'],
+    [`Unit: ${unitLabel}   |   Tahun: ${tahunLabel}   |   Bulan: ${bulanLabel}`],
+    [`Tanggal Export: ${tglExport}   |   Total Data: ${currentTableData.length}`],
+    [] // baris kosong pemisah
+  ];
+
+  // Header kolom tabel
+  const header = ['No', 'Tanggal', 'Nama Observer', 'Nama Petugas', 'Unit',
+    'Langkah 1', 'Langkah 2', 'Langkah 3', 'Langkah 4', 'Langkah 5', 'Langkah 6', 'Keterangan'];
+
+  // Baris data
+  const rows = currentTableData.map((d, i) => [
+    i + 1,
+    d.tanggal,
+    d.namaObserver,
+    d.namaPetugas,
+    d.unit,
+    d.langkah1, d.langkah2, d.langkah3,
+    d.langkah4, d.langkah5, d.langkah6,
+    d.keterangan
+  ]);
+
+  // Baris ringkasan di bawah
+  const totalPatuh      = currentTableData.filter(d => d.keterangan === 'Patuh').length;
+  const totalTidakPatuh = currentTableData.filter(d => d.keterangan === 'Tidak Patuh').length;
+  const persen          = Math.round((totalPatuh / currentTableData.length) * 100);
+
+  const summaryRows = [
+    [],
+    ['RINGKASAN'],
+    ['Total Audit', currentTableData.length],
+    ['Patuh', totalPatuh],
+    ['Tidak Patuh', totalTidakPatuh],
+    ['Tingkat Kepatuhan', `${persen}%`]
+  ];
+
+  // Gabungkan semua baris
+  const allRows = [...titleRows, header, ...rows, ...summaryRows];
+
+  // Buat workbook
+  const ws = XLSX.utils.aoa_to_sheet(allRows);
+
+  // Lebar kolom
+  ws['!cols'] = [
+    {wch:5}, {wch:13}, {wch:20}, {wch:18}, {wch:18},
+    {wch:11}, {wch:11}, {wch:11}, {wch:11}, {wch:11}, {wch:11},
+    {wch:14}
+  ];
+
+  // Merge sel judul (baris 1–4 kolom A sampai L)
+  ws['!merges'] = [
+    { s:{r:0,c:0}, e:{r:0,c:11} },
+    { s:{r:1,c:0}, e:{r:1,c:11} },
+    { s:{r:2,c:0}, e:{r:2,c:11} },
+    { s:{r:3,c:0}, e:{r:3,c:11} }
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Rekap Audit');
+
+  const fileName = `Audit-HH_${unitStr}_${bulanStr}-${tahunStr}.xlsx`;
+  XLSX.writeFile(wb, fileName);
+  showToast(`✅ Export berhasil: ${fileName}`, 'success');
 }
 
 // ============================================================
